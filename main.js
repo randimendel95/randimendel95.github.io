@@ -127,7 +127,7 @@ function draw(mydata) { //draw the circiles initially and on each interaction wi
   var xMin = d3.min(mydata, function(d){return d.app_year;});
   var xMax = d3.max(mydata, function(d){return d.end_year;});
   var yMin = d3.min(mydata, function(d){return d.budget;});
-  var yMax = d3.max(mydata, function(d){console.log(d.budget);return d.budget;});
+  var yMax = d3.max(mydata, function(d){return d.budget;});
 
 //for scatter plot
   var x = d3.scaleLinear()
