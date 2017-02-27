@@ -5,6 +5,7 @@ var height = 450;
 var margin = {top: 20, right: 15, bottom: 30, left: 100};
     var w = width - margin.left - margin.right;
     var h = height - margin.top - margin.bottom;
+    var barh = h/2;
 
 var dataset; //the full dataset
 var curdata;
@@ -25,7 +26,7 @@ var plot = d3.select(".plot")
 
 var barchart = d3.select(".barchart")
     .attr("width", w + margin.left + margin.right)
-    .attr("height", h + margin.top + margin.bottom+15)
+    .attr("height", (barh + margin.top + margin.bottom+15))
     .append("g")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
@@ -49,7 +50,7 @@ var clearBrush = d3.select('#clearBrush')
 d3.csv("data/grants.csv", function(error, data) {
   if (error) return console.warn(error);
   data.forEach(function(d){
-    d.budget = (d['BUDGET TOTAL']).replace(/[^0-9\.]+/g,"");
+    d.budget = +(d['BUDGET TOTAL']).replace(/[^0-9\.]+/g,"");
     d.app_year = d["APPLICATION YEAR"];
     d.sector = d["SECTOR"];
     d.start_year = d["START YR"];
@@ -57,6 +58,8 @@ d3.csv("data/grants.csv", function(error, data) {
     d.research_area = d["BROAD RESEARCH AREA"];
     d.field = d["FIELD OF RESEARCH"];
     d.stat = d["STATUS"];
+    d.gtitle = d["GRANT TITLE"];
+    d.subtype = d["GRANT SUB TYPE"];
   });
   dataset = data;
   curdata = data;
@@ -72,6 +75,9 @@ $(document).ready(function(){
   document.getElementById("open").onchange = function(){
     filterOpen(this.value);
   }
+  document.getElementById("area").onchange = function(){
+    filterArea(this.value);
+  }
 
 });
 
@@ -82,6 +88,19 @@ function filterSector(ntype) {
   }else{
     var filtered = curdata.filter(function(d){
       return d.sector == ntype;
+    });
+    d3.selectAll('.axis').remove();
+    draw(filtered);
+  }
+}
+
+function filterArea(ntype) {
+  var filteredAll = new RegExp("all").test(ntype);
+  if(filteredAll){
+    draw(curdata);
+  }else{
+    var filtered = curdata.filter(function(d){
+      return d.research_area == ntype;
     });
     d3.selectAll('.axis').remove();
     draw(filtered);
@@ -101,13 +120,14 @@ function filterOpen(ntype){
   }
 }
 
+
 function draw(mydata) { //draw the circiles initially and on each interaction with a control
 
 //for scatter plot
-  var xMin = d3.min(mydata, function(d){return d.app_year});
-  var xMax = d3.max(mydata, function(d){return d.end_year});
-  var yMin = d3.min(mydata, function(d){return d.budget});
-  var yMax = d3.max(mydata, function(d){return d.budget});
+  var xMin = d3.min(mydata, function(d){return d.app_year;});
+  var xMax = d3.max(mydata, function(d){return d.end_year;});
+  var yMin = d3.min(mydata, function(d){return d.budget;});
+  var yMax = d3.max(mydata, function(d){console.log(d.budget);return d.budget;});
 
 //for scatter plot
   var x = d3.scaleLinear()
@@ -117,10 +137,10 @@ function draw(mydata) { //draw the circiles initially and on each interaction wi
 //used for both bar chart and scatter plot
   var y = d3.scaleLinear()
         .domain([yMin,yMax])
-        .range([h,0]);
+        .range([h,margin.bottom]);
 
   var xAxis = d3.axisBottom()
-    .scale(x);
+      .scale(x);
 
   var yAxis = d3.axisLeft()
     .scale(y);
@@ -154,7 +174,6 @@ plot.append("g")
   .attr("class","x axis")
   .attr("transform", "translate(0," + h + ")")
   .call(xAxis)
-
     .append("g")
     .attr("class","x label")
     .attr("x",w)
@@ -196,7 +215,7 @@ plot.append("g")
     .on("mouseover",function(d){
       tooltip.transition()
         .style("opacity",.9);
-        tooltip.html("Sector: "+d.sector+"<br />Budget: $"+d.budget)
+        tooltip.html("Project: "+d.subtype+"<br />Research Area: "+d.research_area+ "<br />Sector: "+d.sector+"<br />Budget: $"+d.budget)
           .style("left",(d3.event.pageX+5)+"px")
           .style("top",(d3.event.pageY-28)+"px");
       })
@@ -228,7 +247,7 @@ plot.append("g")
     //y axis for bar chart
   var ybar = d3.scaleLinear()
     .domain([0,sumMax])
-    .range([h,0]);
+    .range([barh,0]);
 
 //bars for barchart
   var bars = barchart.selectAll("rect")
@@ -237,7 +256,7 @@ plot.append("g")
     bars.attr("x", function(d) { return xbar(d.key);  })
     .attr("y", function(d){ return ybar(d.value); })
     .attr("width",50)
-    .attr("height",function(d){ return h-ybar(d.value); })
+    .attr("height",function(d){ return barh-ybar(d.value); })
     .style("fill", function(d) { return col(d.key); });
   //circle
   bars.exit().remove();
@@ -247,7 +266,7 @@ plot.append("g")
     .attr("x", function(d){ return xbar(d.key); })
     .attr("y", function(d){ return ybar(d.value); })
     .attr("width",50) 
-    .attr("height",function(d){ return h-ybar(d.value); })
+    .attr("height",function(d){ return barh-ybar(d.value); })
     .style("fill",function(d) { return col(d.key); });
   
   //add tooltip to barchart to give sector and value of sum.
@@ -273,7 +292,7 @@ var barxAxis = d3.axisBottom()
 //add axis to barchart
 barchart.append("g")
   .attr("class","x axis")
-  .attr("transform", "translate(0," + h + ")")
+  .attr("transform", "translate(0," + barh + ")")
   .call(barxAxis)
     .append("g")
     .attr("class","x label")
@@ -300,7 +319,14 @@ barchart.append("g")
     var circles = plot.selectAll("circle");
     circles.transition()
       .duration(3000)
-      .attr("cx",function(d){ return x(d.start_year); });
+      .attr("cx",function(d){ return x(d.start_year); })
+    plot.selectAll("line")          // attach a line
+    .enter().append("line")
+    .style("stroke", "black")  // colour the line
+    .attr("x1", function(d){ return d.app_year; })     // x position of the first end of the line
+    .attr("y1", function(d){ return d.budget; })      // y position of the first end of the line
+    .attr("x2", function(d) { return d.start_year; })     // x position of the second end of the line
+    .attr("y2", function(d){ return d.budget; });    
     }));
 
   //move data points to end year of project
