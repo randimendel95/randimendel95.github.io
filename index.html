@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html><font face="calibri">
+<meta charset="utf-8">
+
+<style>
+.tooltip {
+	position:absolute;
+	background-color: white;
+	font-color: black;
+	width:180px;
+	height:48px;
+}
+
+</style>
+
+<body>
+	<h1>Research Grants in Australia</h1>
+	<p>This interaction gives the reader the freedom to explore research grants in Australia, and compare aspects of those grants by sector of research. </p>
+	<h3>How to manipulate the data</h3>
+	<ul>
+		<li>Click any of the 3 buttons to move the x-axis of the scatter plot to that aspect of the project</li>
+		<li>Select a factor to filter to only that type</li>
+		<li>Brush a region on the scatter plot to zoom into that region, and bar chart will only represent zoomed region</li>
+		<li>Hover over scatter plot or bar chart for more detail</li>
+	</ul>
+	<div id="controls" >
+		<h2>Filter by Research Sector</h2>
+		<select id="sector">
+					<option value="all">All</option>
+					<option value="Government">Government</option>
+					<option value="Hospital">Hospital</option>
+					<option value="University">University</option>
+					<option value="Research">Research</option>
+					<option value="Other">Other</option>
+		</select>
+		<select id="open">
+					<option value="all">Open or Closed</option>
+					<option value="Open">Open</option>
+					<option value="Closed">Closed</option>
+		</select>
+		<h2>Filters:</h2>
+
+		<div id="years_select">
+			<button id="app">Application Year</button>
+			<button id="start">Start Year</button>
+			<button id="end">End Year</button>
+		</div>
+
+
+
+	</div>
+	<h2 id="yearplot"></h2>
+	<svg class="plot"></svg>
+	<button id="clearBrush", style="opacity:0, font-size:28">Reset</button>
+	
+	<h2>Budget Total by Sector (for above range)</h2>
+	<svg class="barchart"></svg>
+
+	
+
+</body>
+<script src="https://d3js.org/d3.v4.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+<script src="main.js"></script>
+</font>
+</html>
+
