@@ -10,63 +10,111 @@
 
 }
 
+#barchartxaxis path{
+  display: none;
+}
+
+.legend {
+	width:20px;
+	height:20px;
+	opacity:.7;
+}
+
+rect {
+	opacity:.7;
+}
+
 </style>
 
 <body>
-	<h1>Research Grants in Australia</h1>
-	<div id="controls" >
-		<h2>Filter by Research Sector</h2>
+<div class="container">
+<h1>Research Grants in Australia</h1>
+</div>
 
-		<select id="sector">
-					<option value="all">All</option>
+
+
+
+<div class="container">
+	<div class="row">
+		<div class="col-lg-7">
+			<h2 id="yearplot"></h2>
+			<svg class="plot"></svg>
+			<button id="clearBrush", style="opacity:0, font-size:28">Reset</button>
+			<div id="years_select">
+				<button id="app">Application Year</button>
+				<button id="start">Start Year</button>
+				<button id="end">End Year</button>
+			</div>
+
+		</div>
+		<div class="col-lg-5">
+			<div id="controls", class="row" >
+				<div class="col-6 col-lg-6">
+					<h2>Legend</h2>
+					<div>
+						<div class="legend", style="background-color: #e41a1c"></div>Govenment
+						<div class="legend", style="background-color: #377eb8"></div>Hospital
+						<div class="legend", style="background-color: #4daf4a"></div>Research
+						<div class="legend", style="background-color: #984ea3"></div>University
+						<div class="legend", style="background-color: #ff7f00"></div>Other
+
+
+					</div>
+				</div>
+				<div class="col-6 col-lg-6">
+
+
+				<h2>Filter Research Projects</h2>
+				<label for="sector">Funding Sector</label><br />
+				<select id="sector">
+					<option value="all">All</optiona>
 					<option value="Government">Government</option>
 					<option value="Hospital">Hospital</option>
 					<option value="University">University</option>
 					<option value="Research">Research</option>
 					<option value="Other">Other</option>
-		</select>
-		<label for="sector">Funding Sector</label>
-<br />
-		<select id="open">
+				</select>
+
+				<br />
+				<label for="open">Open or Closed</label><br />
+				<select id="open">
 					<option value="all">Both</option>
 					<option value="Open">Open</option>
 					<option value="Closed">Closed</option>
-		</select>
-				<label for="open">Open or Closed</label>
-<br />
-		<select id="area">
+				</select>
+
+				<br />
+				<label for="area">Broad Research Catatgory</label><br />
+				<select id="area">
 					<option value="all">All</option>
 					<option value="Not Applicable">Not Applicable</option>
 					<option value="Basic Science">Basic Science</option>
 					<option value="Public Health">Public Health</option>
 					<option value="Clinical Medicine and Science">Clinical Medicine and Science</option>
 					<option value="Health Services Research">Health Services Research</option>
-		</select>
-		<label for="area">Broad Research Catatgory</label>
-		<h2>Filters:</h2>
-
-		<div id="years_select">
-			<button id="app">Application Year</button>
-			<button id="start">Start Year</button>
-			<button id="end">End Year</button>
+				</select>
+				<br />
+				<br />
+				
+		
+			</div>
+			</div>	
+			<svg class="barchart"></svg>
 		</div>
 
 
-
 	</div>
-	<h2 id="yearplot"></h2>
-	<svg class="plot"></svg>
-	<button id="clearBrush", style="opacity:0, font-size:28">Reset</button>
-	
-	<h2>Budget Total by Sector (for above range)</h2>
-	<svg class="barchart"></svg>
+</div>
 
 	
 
 </body>
 <script src="d3.min.js"></script>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+<script src="jquery-3.1.1.min.js"></script>
 <script src="main.js"></script>
+
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
 </font>
 </html>
 

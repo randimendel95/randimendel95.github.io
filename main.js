@@ -1,6 +1,6 @@
 
 //svg dimensions - same for both graphics for the time being 
-var width = 750;
+var width = 650;
 var height = 450;
 var margin = {top: 20, right: 15, bottom: 30, left: 100};
     var w = width - margin.left - margin.right;
@@ -9,6 +9,7 @@ var margin = {top: 20, right: 15, bottom: 30, left: 100};
 
 var dataset; //the full dataset
 var curdata;
+var bar_width = 80;
 
 var yearplot = d3.select("#yearplot")
   .text("Research Project Budget by Application Year");
@@ -30,6 +31,31 @@ var barchart = d3.select(".barchart")
     .append("g")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
+barchart.append("g")
+  .attr("class","y axis")
+  .attr("id","barchartyaxis");
+  //.attr("transform", "translate("+ margin.left-(bar_width/2)+"," + 0 + ")");
+
+
+  //add axis to barchart
+barchart.append("g")
+  .attr("class","x axis")
+  .attr("id","barchartxaxis")
+  .attr("transform","translate("+bar_width/2+","+barh+")");
+
+//plot y axis
+plot.append("g")
+  .attr("class","y axis")
+  .attr("id","plotyaxis");
+
+plot.append("g")
+  .attr("class","x axis")
+  .attr("transform", "translate(0," + h + ")")
+  .attr("id","plotxaxis");
+
+
+
+
 var tooltip = d3.select("body").append("div")
     .attr("class", "tooltip")
     .style("opacity", 0);
@@ -41,7 +67,6 @@ var clearBrush = d3.select('#clearBrush')
     .style('margin-left',100)
     .on('click', function(){
       clearBrush.style("opacity",0);
-      d3.selectAll('.axis').remove();
       curdata = dataset;
       draw(dataset);
     })
@@ -89,7 +114,7 @@ function filterSector(ntype) {
     var filtered = curdata.filter(function(d){
       return d.sector == ntype;
     });
-    d3.selectAll('.axis').remove();
+    //d3.selectAll('.axis').remove();
     draw(filtered);
   }
 }
@@ -102,7 +127,7 @@ function filterArea(ntype) {
     var filtered = curdata.filter(function(d){
       return d.research_area == ntype;
     });
-    d3.selectAll('.axis').remove();
+    //d3.selectAll('.axis').remove();
     draw(filtered);
   }
 }
@@ -115,7 +140,7 @@ function filterOpen(ntype){
     var filtered = curdata.filter(function(d){
       return d.stat == ntype;
     });
-    d3.selectAll('.axis').remove();
+    //d3.selectAll('.axis').remove();
     draw(filtered);
   }
 }
@@ -154,8 +179,6 @@ function draw(mydata) { //draw the circiles initially and on each interaction wi
     var y0 = d3.event.selection[0][1];
     var y1 = d3.event.selection[1][1];
     console.log('x0:'+x0+',x1:'+x1+',y0:'+y0+',y1:'+y1); 
-    d3.selectAll('.axis').remove();
-    console.log('removed axis');
     clearBrush.style('opacity',.9);
     curdata = mydata.filter(function(d){ 
       return (x(d.app_year)>=x0 && x(d.app_year)<=x1 && y(d.budget)>=y0 && y(d.budget)<=y1)
@@ -170,10 +193,9 @@ var gBrush = plot.append('g')
   .attr('class', 'brush')
   .call(brush);
 
-plot.append("g")
-  .attr("class","x axis")
-  .attr("transform", "translate(0," + h + ")")
-  .call(xAxis)
+  var t = plot.transition().duration(750);
+
+  plot.select("#plotxaxis").call(xAxis)
     .append("g")
     .attr("class","x label")
     .attr("x",w)
@@ -181,9 +203,8 @@ plot.append("g")
     .style("text-anchor", "end")
     .text("Year");
 
-plot.append("g")
-  .attr("class","y axis")
-  .call(yAxis)
+
+  plot.select("#plotyaxis").call(yAxis)
     .append("g")
         .attr("class","y label")
         .append("text")
@@ -197,7 +218,6 @@ plot.append("g")
 
   var circles = plot.selectAll("circle")
     .data(mydata)
-
 	//circle
   //circle
     .attr("cx", function(d) { return x(d.app_year);  })
@@ -242,7 +262,7 @@ plot.append("g")
   //for barchart, x axis
   var xbar = d3.scaleOrdinal()
     .domain(["Government","Hospital","Research","University","Other"])
-    .range([0,(w-30)/4,(w-30)/2,(3*w-30)/4,w-30]);
+    .range([0,(w-(bar_width))/4,(w-(bar_width))/2,(3*(w-(bar_width)))/4,(w-bar_width)]);
 
     //y axis for bar chart
   var ybar = d3.scaleLinear()
@@ -255,7 +275,7 @@ plot.append("g")
 
     bars.attr("x", function(d) { return xbar(d.key);  })
     .attr("y", function(d){ return ybar(d.value); })
-    .attr("width",50)
+    .attr("width",bar_width)
     .attr("height",function(d){ return barh-ybar(d.value); })
     .style("fill", function(d) { return col(d.key); });
   //circle
@@ -265,7 +285,7 @@ plot.append("g")
   bars.enter().append("rect")
     .attr("x", function(d){ return xbar(d.key); })
     .attr("y", function(d){ return ybar(d.value); })
-    .attr("width",50) 
+    .attr("width",bar_width) 
     .attr("height",function(d){ return barh-ybar(d.value); })
     .style("fill",function(d) { return col(d.key); });
   
@@ -282,31 +302,30 @@ plot.append("g")
           .style("opacity",0);
       });
 
-//create x axis for bar chart 
-var barxAxis = d3.axisBottom()
+  //create x axis for bar chart 
+  var barxAxis = d3.axisBottom()
     .scale(xbar);
-//y axis
+  //y axis
   var baryAxis = d3.axisLeft()
     .scale(ybar);
 
-//add axis to barchart
-barchart.append("g")
-  .attr("class","x axis")
-  .attr("transform", "translate(0," + barh + ")")
-  .call(barxAxis)
+
+
+  d3.select("#barchartxaxis").call(barxAxis)
+    //.transition().duration(800)
     .append("g")
-    .attr("class","x label")
-    .attr("y",h)
+    .attr("class","X label")
+    .attr("y",barh)
     .style("text-anchor", "end")
     .text("Sector");
 
+  d3.select("#barchartyaxis")
+    .call(baryAxis)
 
-barchart.append("g")
-  .attr("class","y axis")
-  .call(baryAxis)
-    .append("g")
-        .attr("class","y label")
-        .append("text")
+    //.transition().duration(1000)
+      .append("g")
+      .attr("class","y label")
+
         .attr("transform", "rotate(-90)")
         .attr("x",w)
         .attr("y",h)
