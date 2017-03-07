@@ -1,15 +1,43 @@
 
 //svg dimensions - same for both graphics for the time being 
-var width = 650;
+var width = 600;
 var height = 450;
-var margin = {top: 20, right: 15, bottom: 30, left: 100};
+var margin = {top: 10, right: 15, bottom: 30, left: 90};
     var w = width - margin.left - margin.right;
     var h = height - margin.top - margin.bottom;
     var barh = h/2;
+    var bar_margin = {left:110};
+    var w = width - margin.right - bar_margin.left;
+
 
 var dataset; //the full dataset
 var curdata;
 var bar_width = 80;
+
+xMin=0;
+xMax=0;
+yMin=0;
+yMax=0;
+
+var a_sector = "all";
+var a_open = "all";
+var a_area = "all";
+
+//for scatter plot
+  var x = d3.scaleLinear()
+        .domain([xMin,xMax])
+        .range([0, w]);
+
+//used for both bar chart and scatter plot
+  var y = d3.scaleLinear()
+        .domain([yMin,yMax])
+        .range([h,margin.bottom]);
+
+  var xAxis = d3.axisBottom()
+      .scale(x);
+
+  var yAxis = d3.axisLeft()
+    .scale(y);
 
 var yearplot = d3.select("#yearplot")
   .text("Research Project Budget by Application Year");
@@ -29,7 +57,35 @@ var barchart = d3.select(".barchart")
     .attr("width", w + margin.left + margin.right)
     .attr("height", (barh + margin.top + margin.bottom+15))
     .append("g")
-    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+    .attr("transform", "translate(" + bar_margin.left + "," + margin.top + ")");
+
+
+//y axis label -- scatter plot
+plot.append("text")
+        .attr("transform", "rotate(-90)")
+        .attr("y", 0 - margin.left )
+        .attr("x",0 - (h / 2))
+        .attr("dy", "1em")
+        .style("font-size",20)
+        .style("text-anchor", "middle")
+        .text("Project Budget ($)");
+
+//x axis label -- scatter plot
+plot.append("text")
+        .attr("y", h + margin.bottom - 12)
+        .attr("x",w/2)
+        .attr("dy", "1em")
+        .style("font-size",20)
+        .style("text-anchor", "middle")
+        .text("Year");
+
+barchart.append("text")
+        .attr("transform", "rotate(-90)")
+        .attr("x",-barh/4)
+        .attr("y",20-bar_margin.left)
+        .style("text-anchor", "end")
+        .style("font-size",18)
+        .text("Total Budget ($)");
 
 barchart.append("g")
   .attr("class","y axis")
@@ -53,22 +109,18 @@ plot.append("g")
   .attr("transform", "translate(0," + h + ")")
   .attr("id","plotxaxis");
 
-
-
-
 var tooltip = d3.select("body").append("div")
     .attr("class", "tooltip")
     .style("opacity", 0);
 
 var clearBrush = d3.select('#clearBrush')
-    .attr('class','btn')
-    .style('opacity',0)
-    .style('font-size',28)
-    .style('margin-left',100)
+    .style("margin","auto")
+    .style("class","btn-warning")
     .on('click', function(){
       clearBrush.style("opacity",0);
+      //reset bounds, not pull whole starting dataset.
       curdata = dataset;
-      draw(dataset);
+      filterSet(curdata);
     })
     .text('Clear Brushing');
 
@@ -95,80 +147,66 @@ d3.csv("data/grants.csv", function(error, data) {
 
 $(document).ready(function(){
   document.getElementById("sector").onchange = function(){
-    filterSector(this.value);
+    a_sector = this.value;
+    console.log("sector filter");
+    filterSet(this.value);
   }
   document.getElementById("open").onchange = function(){
-    filterOpen(this.value);
+    a_open = this.value;
+    filterSet(this.value);
   }
   document.getElementById("area").onchange = function(){
-    filterArea(this.value);
+    a_area = this.value;
+    filterSet(this.value);
   }
 
 });
 
-function filterSector(ntype) {
-  var filteredAll = new RegExp("all").test(ntype);
-  if(filteredAll){
-    draw(curdata);
-  }else{
-    var filtered = curdata.filter(function(d){
-      return d.sector == ntype;
-    });
-    //d3.selectAll('.axis').remove();
-    draw(filtered);
-  }
-}
-
-function filterArea(ntype) {
-  var filteredAll = new RegExp("all").test(ntype);
-  if(filteredAll){
-    draw(curdata);
-  }else{
-    var filtered = curdata.filter(function(d){
-      return d.research_area == ntype;
-    });
-    //d3.selectAll('.axis').remove();
-    draw(filtered);
-  }
-}
-
-function filterOpen(ntype){
-  var filteredAll = new RegExp("all").test(ntype);
-  if(filteredAll){
-    draw(curdata);
-  }else{
-    var filtered = curdata.filter(function(d){
-      return d.stat == ntype;
-    });
-    //d3.selectAll('.axis').remove();
-    draw(filtered);
-  }
+function filterSet(ntype) {
+  console.log(a_sector);
+  console.log(a_open);
+  console.log(a_area);
+  var filteredAllSect = new RegExp("all").test(a_sector);
+  var filteredAllOpen = new RegExp("all").test(a_open);
+  var filteredAllArea = new RegExp("all").test(a_area);
+  console.log(filteredAllSect);
+  console.log(filteredAllOpen);
+  console.log(filteredAllArea);
+  var filtered = curdata.filter(function(d){
+    if(filteredAllSect){
+      return true;
+    } else {
+      return d.sector == a_sector;
+    }
+  });
+  filtered = filtered.filter(function(d){
+    if(filteredAllOpen){
+      return true;
+    } else{
+      return d.stat == a_open;
+    }
+  });
+  filtered = filtered.filter(function(d){
+    if(filteredAllArea){
+      return true;
+    } else {
+      return d.research_area == a_area;
+    }
+  });
+ draw(filtered);
 }
 
 
 function draw(mydata) { //draw the circiles initially and on each interaction with a control
 
 //for scatter plot
-  var xMin = d3.min(mydata, function(d){return d.app_year;});
-  var xMax = d3.max(mydata, function(d){return d.end_year;});
-  var yMin = d3.min(mydata, function(d){return d.budget;});
-  var yMax = d3.max(mydata, function(d){return d.budget;});
+  xMin = d3.min(mydata, function(d){return d.app_year;});
+  xMax = d3.max(mydata, function(d){return d.end_year;});
+  yMin = d3.min(mydata, function(d){return d.budget;});
+  yMax = d3.max(mydata, function(d){return d.budget;});
 
-//for scatter plot
-  var x = d3.scaleLinear()
-        .domain([xMin,xMax])
-        .range([0, w]);
-
-//used for both bar chart and scatter plot
-  var y = d3.scaleLinear()
-        .domain([yMin,yMax])
-        .range([h,margin.bottom]);
-
-  var xAxis = d3.axisBottom()
-      .scale(x);
-
-  var yAxis = d3.axisLeft()
-    .scale(y);
+  x.domain([xMin,xMax]);
+  y.domain([yMin,yMax]);
 
   var brush = d3.brush()
   .extent([[0, 0], [w, h]])
@@ -178,22 +216,26 @@ function draw(mydata) { //draw the circiles initially and on each interaction wi
     var x1 = d3.event.selection[1][0];
     var y0 = d3.event.selection[0][1];
     var y1 = d3.event.selection[1][1];
-    console.log('x0:'+x0+',x1:'+x1+',y0:'+y0+',y1:'+y1); 
+    //console.log('x0:'+x0+',x1:'+x1+',y0:'+y0+',y1:'+y1); 
     clearBrush.style('opacity',.9);
     curdata = mydata.filter(function(d){ 
       return (x(d.app_year)>=x0 && x(d.app_year)<=x1 && y(d.budget)>=y0 && y(d.budget)<=y1)
     });
-    draw(curdata);
+
+    circles
+    .data(curdata, function(d){return d;}).order()  
+    .exit().remove();
+
+    //draw(curdata);
+    //draw(curdata);
     gBrush.remove();
 
 
   });
      // attach the brush to the chart
-var gBrush = plot.append('g')
-  .attr('class', 'brush')
-  .call(brush);
-
-  var t = plot.transition().duration(750);
+  var gBrush = plot.append('g')
+    .attr('class', 'brush')
+    .call(brush);
 
   plot.select("#plotxaxis").call(xAxis)
     .append("g")
@@ -216,14 +258,16 @@ var gBrush = plot.append('g')
         .text("Total Budget");
 
 
-  var circles = plot.selectAll("circle")
-    .data(mydata)
-	//circle
-  //circle
+  var circles = plot.selectAll("circle")   
+    .data(mydata) 
     .attr("cx", function(d) { return x(d.app_year);  })
     .attr("cy", function(d) { return y(d.budget);  })
     .attr("r", w/(4*(xMax-xMin)))
     .style("fill", function(d) { return col(d.sector); });
+	//circle
+  //circle
+
+
 	//circle
   circles.exit().remove();
 
@@ -277,7 +321,19 @@ var gBrush = plot.append('g')
     .attr("y", function(d){ return ybar(d.value); })
     .attr("width",bar_width)
     .attr("height",function(d){ return barh-ybar(d.value); })
-    .style("fill", function(d) { return col(d.key); });
+    .style("fill", function(d) { return col(d.key); })
+    .on("mouseover",function(d){
+      console.log("mouseover bar");
+      tooltip.transition()
+        .style("opacity",.9);
+        tooltip.html("Sector: "+d.key+"<br />Total Budget: $"+d.value)
+          .style("left",(d3.event.pageX+5)+"px")
+          .style("top",(d3.event.pageY-28)+"px");
+      })
+      .on("mouseout",function(d){
+        tooltip.transition()
+          .style("opacity",0);
+      });
   //circle
   bars.exit().remove();
 
@@ -289,18 +345,7 @@ var gBrush = plot.append('g')
     .attr("height",function(d){ return barh-ybar(d.value); })
     .style("fill",function(d) { return col(d.key); });
   
-  //add tooltip to barchart to give sector and value of sum.
-  bars.on("mouseover",function(d){
-      tooltip.transition()
-        .style("opacity",.9);
-        tooltip.html("Sector: "+d.key+"<br />Total Budget: $"+d.value)
-          .style("left",(d3.event.pageX+5)+"px")
-          .style("top",(d3.event.pageY-28)+"px");
-      })
-      .on("mouseout",function(d){
-        tooltip.transition()
-          .style("opacity",0);
-      });
+
 
   //create x axis for bar chart 
   var barxAxis = d3.axisBottom()
@@ -311,30 +356,23 @@ var gBrush = plot.append('g')
 
 
 
-  d3.select("#barchartxaxis").call(barxAxis)
-    //.transition().duration(800)
-    .append("g")
-    .attr("class","X label")
-    .attr("y",barh)
-    .style("text-anchor", "end")
-    .text("Sector");
+  d3.select("#barchartxaxis")
+    .call(barxAxis);
+
 
   d3.select("#barchartyaxis")
-    .call(baryAxis)
+    .call(baryAxis);
 
-    //.transition().duration(1000)
-      .append("g")
-      .attr("class","y label")
-
-        .attr("transform", "rotate(-90)")
-        .attr("x",w)
-        .attr("y",h)
-        .style("text-anchor", "end")
-        .text("Total Budget");
 
 //move data points to start year of project
   d3.select("#start").on("click",(function(){
-    yearplot.text("Research Project Budget by Start Year");
+      yearplot.transition().duration(2500)
+          .style("opacity", 0);
+
+      yearplot.transition().delay(1500).duration(1500)
+          .style("opacity", 1)
+          .text("Budget by Start Year");
+    //yearplot.transition().duration(1000).text("Research Project Budget by Start Year");
     var circles = plot.selectAll("circle");
     circles.transition()
       .duration(3000)
@@ -350,7 +388,13 @@ var gBrush = plot.append('g')
 
   //move data points to end year of project
   d3.select("#end").on("click",function(){
-    yearplot.text("Research Project Budget by End Year");
+      yearplot.transition().duration(2500)
+        .style("opacity", 0);
+
+      yearplot.transition().delay(1500).duration(1500)
+        .style("opacity", 1)
+        .text("Budget by End Year");
+    //yearplot.transition().duration(1000).text("Research Project Budget by End Year");
     var circles = plot.selectAll("circle");
     circles.transition()
       .duration(3000)
@@ -359,7 +403,13 @@ var gBrush = plot.append('g')
 
 //change to application year of project
   d3.select("#app").on("click",function(){
-    yearplot.text("Research Project Budget by Application Year");
+      yearplot.transition().duration(2500)
+        .style("opacity", 0);
+
+      yearplot.transition().delay(1500).duration(1500)
+          .style("opacity", 1)
+          .text("Budget by Application Year");
+    //yearplot.text("Research Project Budget by Application Year");
     var circles = plot.selectAll("circle");
     circles.transition()
       .duration(3000)

@@ -20,6 +20,14 @@
 	opacity:.7;
 }
 
+#clearBrush {
+	font-size:42;
+	background-color:'red';
+	text-align:center;
+	opacity:0;
+	margin: auto;
+}
+
 rect {
 	opacity:.7;
 }
@@ -36,10 +44,10 @@ rect {
 
 <div class="container">
 	<div class="row">
-		<div class="col-lg-7">
+		<div class="col-xl-6">
 			<h2 id="yearplot"></h2>
+			<button id="clearBrush" class=></button>
 			<svg class="plot"></svg>
-			<button id="clearBrush", style="opacity:0, font-size:28">Reset</button>
 			<div id="years_select">
 				<button id="app">Application Year</button>
 				<button id="start">Start Year</button>
@@ -47,24 +55,14 @@ rect {
 			</div>
 
 		</div>
-		<div class="col-lg-5">
+		<div class="col-xl-6">
+			<br /><br />
 			<div id="controls", class="row" >
-				<div class="col-6 col-lg-6">
-					<h2>Legend</h2>
-					<div>
-						<div class="legend", style="background-color: #e41a1c"></div>Govenment
-						<div class="legend", style="background-color: #377eb8"></div>Hospital
-						<div class="legend", style="background-color: #4daf4a"></div>Research
-						<div class="legend", style="background-color: #984ea3"></div>University
-						<div class="legend", style="background-color: #ff7f00"></div>Other
+				
+				<div class="col-6 col-lg-8">
 
 
-					</div>
-				</div>
-				<div class="col-6 col-lg-6">
-
-
-				<h2>Filter Research Projects</h2>
+				<h2>Filter Projects</h2>
 				<label for="sector">Funding Sector</label><br />
 				<select id="sector">
 					<option value="all">All</optiona>
@@ -98,6 +96,18 @@ rect {
 				
 		
 			</div>
+			<div class="col-6 col-lg-4">
+					<h2>Legend</h2>
+					<div class="row">
+						<div class="legend col-lg-1", style="background-color: #e41a1c"></div><div class="col-lg-10">Govenment</div>
+						<div class="legend col-lg-1", style="background-color: #377eb8"></div><div class="col-lg-10">Hospital</div>
+						<div class="legend col-lg-1", style="background-color: #4daf4a"></div><div class="col-lg-10">Research</div>
+						<div class="legend col-lg-1", style="background-color: #984ea3"></div><div class="col-lg-10">University</div>
+						<div class="legend col-lg-1", style="background-color: #ff7f00"></div><div class="col-lg-10">Other</div>
+
+
+					</div>
+				</div>
 			</div>	
 			<svg class="barchart"></svg>
 		</div>
@@ -112,8 +122,8 @@ rect {
 <script src="d3.min.js"></script>
 <script src="jquery-3.1.1.min.js"></script>
 <script src="main.js"></script>
-
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
 </font>
 </html>
