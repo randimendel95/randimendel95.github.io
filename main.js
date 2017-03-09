@@ -90,7 +90,6 @@ barchart.append("text")
 barchart.append("g")
   .attr("class","y axis")
   .attr("id","barchartyaxis");
-  //.attr("transform", "translate("+ margin.left-(bar_width/2)+"," + 0 + ")");
 
 
   //add axis to barchart
@@ -221,12 +220,7 @@ function draw(mydata) { //draw the circiles initially and on each interaction wi
     curdata = mydata.filter(function(d){ 
       return (x(d.app_year)>=x0 && x(d.app_year)<=x1 && y(d.budget)>=y0 && y(d.budget)<=y1)
     });
-
-    circles
-    .data(curdata, function(d){return d;}).order()  
-    .exit().remove();
-
-    //draw(curdata);
+    draw(curdata);
     //draw(curdata);
     gBrush.remove();
 
@@ -238,7 +232,8 @@ function draw(mydata) { //draw the circiles initially and on each interaction wi
     .call(brush);
 
   plot.select("#plotxaxis").call(xAxis)
-    .append("g")
+    .append("g")    
+      .transition().duration(1000)
     .attr("class","x label")
     .attr("x",w)
     .attr("y",0)
@@ -259,7 +254,7 @@ function draw(mydata) { //draw the circiles initially and on each interaction wi
 
 
   var circles = plot.selectAll("circle")   
-    .data(mydata) 
+    .data(mydata)
     .attr("cx", function(d) { return x(d.app_year);  })
     .attr("cy", function(d) { return y(d.budget);  })
     .attr("r", w/(4*(xMax-xMin)))
@@ -267,7 +262,16 @@ function draw(mydata) { //draw the circiles initially and on each interaction wi
 	//circle
   //circle
 
+    circles.transition().duration(1000)
 
+      .delay(function(d, i) {
+        console.log(mydata.l);
+        return i / mydata.length * 500;  // Dynamic delay (i.e. each item delays a little longer)
+      })
+      .attr("cx", function(d) { return x(d.app_year);  })
+      .attr("cy", function(d) { return y(d.budget);  })
+      .attr("r", w/(4*(xMax-xMin)))
+      .style("fill", function(d) { return col(d.sector); });
 	//circle
   circles.exit().remove();
 
@@ -323,7 +327,6 @@ function draw(mydata) { //draw the circiles initially and on each interaction wi
     .attr("height",function(d){ return barh-ybar(d.value); })
     .style("fill", function(d) { return col(d.key); })
     .on("mouseover",function(d){
-      console.log("mouseover bar");
       tooltip.transition()
         .style("opacity",.9);
         tooltip.html("Sector: "+d.key+"<br />Total Budget: $"+d.value)
@@ -417,5 +420,3 @@ function draw(mydata) { //draw the circiles initially and on each interaction wi
   });
 
 }
-
-
